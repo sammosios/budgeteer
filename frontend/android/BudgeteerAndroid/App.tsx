@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from 'react-native';
 
@@ -13,13 +12,12 @@ import AuthScreen from './AuthScreen';
 import MainScreen from './MainScreen';
 import SettingsModal from './SettingsModal';
 
-const API_URL = 'http://localhost:3000'; // Assuming backend is accessible from mobile
+import { ThemeProvider, useTheme } from './ThemeContext';
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+import { API_URL } from '@env';
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+function AppContent(): React.JSX.Element {
+  const { isDarkMode, colors } = useTheme();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [amount, setAmount] = useState('0');
   const [category, setCategory] = useState('');
@@ -28,6 +26,13 @@ function App(): React.JSX.Element {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [isReversedOrder, setIsReversedOrder] = useState(true); // Default to newest on top
   const [errorMessage, setErrorMessage] = useState('');
+
+
+  const getToken = useCallback(async () => {
+      // For simplicity, using a basic in-memory token.
+      // In a real app, use AsyncStorage or similar for persistent storage.
+      return global.accessToken;
+    }, []);
 
   useEffect(() => {
     // Check for token on app start
@@ -39,7 +44,7 @@ function App(): React.JSX.Element {
       }
     };
     checkToken();
-  }, []);
+  }, [getToken]);
 
   useEffect(() => {
     if (errorMessage) {
@@ -50,18 +55,6 @@ function App(): React.JSX.Element {
     }
   }, [errorMessage]);
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchTransactions();
-    }
-  }, [isLoggedIn]);
-
-  const getToken = async () => {
-    // For simplicity, using a basic in-memory token.
-    // In a real app, use AsyncStorage or similar for persistent storage.
-    return global.accessToken;
-  };
-
   const setToken = (token: string) => {
     global.accessToken = token;
   };
@@ -70,13 +63,13 @@ function App(): React.JSX.Element {
     global.accessToken = null;
   };
 
-  const logoutUser = () => {
+  const logoutUser = useCallback(() => {
     removeToken();
     setIsLoggedIn(false);
     // Clear transactions or other app-specific state here
-  };
+  }, []);
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     const token = await getToken();
     if (!token) {
       setIsLoggedIn(false);
@@ -104,7 +97,47 @@ function App(): React.JSX.Element {
       console.error('Error fetching transactions:', error);
       setErrorMessage('Failed to fetch transactions.');
     }
-  };
+  }, [getToken, logoutUser]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchTransactions();
+    }
+  }, [isLoggedIn, fetchTransactions]);
+
+  const styles = StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.primaryBg,
+    },
+    scrollView: {
+      backgroundColor: colors.primaryBg,
+    },
+    container: {
+      backgroundColor: colors.primaryBg,
+      padding: 20,
+      borderRadius: 8,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 5,
+      margin: 20,
+      minHeight: '90%', // Adjust as needed
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      color: colors.primaryText,
+      marginBottom: 20,
+    },
+    errorMessage: {
+      color: colors.accentRed,
+      textAlign: 'center',
+      marginBottom: 10,
+    },
+  });
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -112,9 +145,14 @@ function App(): React.JSX.Element {
       <ScrollView contentInsetAdjustmentBehavior="automatic" style={styles.scrollView}>
         <View style={styles.container}>
           <Text style={styles.title}>Budgeteer</Text>
+          {errorMessage ? <Text style={styles.errorMessage}>{errorMessage}</Text> : null}
 
           {!isLoggedIn ? (
-            <AuthScreen setIsLoggedIn={setIsLoggedIn} setErrorMessage={setErrorMessage} />
+            <AuthScreen
+              setIsLoggedIn={setIsLoggedIn}
+              setErrorMessage={setErrorMessage}
+              setToken={setToken}
+            />
           ) : (
             <MainScreen
               logoutUser={logoutUser}
@@ -125,7 +163,6 @@ function App(): React.JSX.Element {
               setAmount={setAmount}
               category={category}
               setCategory={setCategory}
-              errorMessage={errorMessage}
               setErrorMessage={setErrorMessage}
               transactions={transactions}
               fetchTransactions={fetchTransactions}
@@ -145,33 +182,12 @@ function App(): React.JSX.Element {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f4f4f4',
-  },
-  scrollView: {
-    backgroundColor: '#f4f4f4',
-  },
-  container: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-    margin: 20,
-    minHeight: '90%', // Adjust as needed
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#333',
-    marginBottom: 20,
-  },
-});
+function App(): React.JSX.Element {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+}
 
 export default App;

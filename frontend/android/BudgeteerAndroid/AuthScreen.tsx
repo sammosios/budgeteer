@@ -7,27 +7,22 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useTheme } from './ThemeContext';
 
 const API_URL = 'http://localhost:3000'; // Assuming backend is accessible from mobile
 
 interface AuthScreenProps {
   setIsLoggedIn: (isLoggedIn: boolean) => void;
   setErrorMessage: (message: string) => void;
+  setToken: (token: string) => void;
 }
 
-const AuthScreen: React.FC<AuthScreenProps> = ({ setIsLoggedIn, setErrorMessage }) => {
+const AuthScreen: React.FC<AuthScreenProps> = ({ setIsLoggedIn, setErrorMessage, setToken }) => {
+  const { colors } = useTheme();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const getToken = async () => {
-    // For simplicity, using a basic in-memory token.
-    // In a real app, use AsyncStorage or similar for persistent storage.
-    return global.accessToken;
-  };
-
-  const setToken = (token: string) => {
-    global.accessToken = token;
-  };
+  
 
   const registerUser = async () => {
     if (!username || !password) {
@@ -85,15 +80,58 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ setIsLoggedIn, setErrorMessage 
     }
   };
 
+  const styles = StyleSheet.create({
+  loginSection: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: colors.primaryText,
+    marginBottom: 15,
+  },
+  input: {
+    width: '100%',
+    padding: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: colors.borderColor,
+    borderRadius: 4,
+    fontSize: 16,
+    backgroundColor: colors.secondaryBg,
+    color: colors.primaryText,
+  },
+  authButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  button: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 4,
+    backgroundColor: colors.accentBlue,
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: colors.primaryText,
+    fontSize: 14,
+  },
+});
+
+
   return (
     <View style={styles.loginSection}>
-      <Text style={styles.subtitle}>Login / Register</Text>
+      {/* <Text style={styles.subtitle}>Login / Register</Text> */}
       <TextInput
         style={styles.input}
         placeholder="Username"
         value={username}
         onChangeText={setUsername}
         autoCapitalize="none"
+        placeholderTextColor={colors.secondaryText}
       />
       <TextInput
         style={styles.input}
@@ -101,6 +139,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ setIsLoggedIn, setErrorMessage 
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        placeholderTextColor={colors.secondaryText}
       />
       <View style={styles.authButtons}>
         <TouchableOpacity style={styles.button} onPress={loginUser}>
@@ -114,43 +153,5 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ setIsLoggedIn, setErrorMessage 
   );
 };
 
-const styles = StyleSheet.create({
-  loginSection: {
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#333',
-    marginBottom: 15,
-  },
-  input: {
-    width: '100%',
-    padding: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    fontSize: 16,
-  },
-  authButtons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 10,
-  },
-  button: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 4,
-    backgroundColor: '#007bff',
-    marginHorizontal: 5,
-  },
-  buttonText: {
-    color: '#333',
-    fontSize: 14,
-  },
-});
 
 export default AuthScreen;
