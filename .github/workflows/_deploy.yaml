@@ -1,0 +1,58 @@
+name: Reusable Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+    secrets:
+      OCI_VM_IP:
+        required: true
+      OCI_SSH_PRIVATE_KEY:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log branch name
+        run: echo "Current branch: ${{ github.ref_name }}"
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.OCI_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Add VM to known_hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.OCI_VM_IP }} >> ~/.ssh/known_hosts
+
+      - name: Preserve existing configuration
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.OCI_VM_IP }} "sudo cp /opt/budgeteer/frontend/config.js /tmp/config.js"
+
+      - name: Update App
+        run: |
+          # Remove existing app directory
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.OCI_VM_IP }} "sudo rm -rf /opt/budgeteer"
+          
+          # Clone the repository
+          git_branch=$(echo "${{ github.ref_name }}" | sed 's/refs\/heads\///')
+
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.OCI_VM_IP }} "sudo git clone --depth 1 --branch ${git_branch} https://github.com/sammosios/budgeteer.git /opt/budgeteer"
+
+          # Restore configuration
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.OCI_VM_IP }} "sudo mv /tmp/config.js /opt/budgeteer/frontend/config.js"
+
+          # Backend setup
+          cd /opt/budgeteer/backend
+          sudo npm install --omit=dev
+
+          # Restart backend service
+          sudo systemctl restart budgeteer-backend

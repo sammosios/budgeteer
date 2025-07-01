@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budgeteer</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Budgeteer</h1>
+        <div id="errorMessage" class="error-message"></div>
+
+        <div id="loginSection">
+            <h2>Login / Register</h2>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <div class="auth-buttons">
+                <button id="loginBtn">Login</button>
+                <button id="registerBtn">Register</button>
+            </div>
+        </div>
+
+        <div id="appSection" style="display: none;">
+            <div class="top-buttons-container">
+                <button id="logoutBtn" class="logout-button">Logout</button>
+                <button id="settingsBtn" class="settings-button">Settings</button>
+            </div>
+            <div class="input-section">
+                <input type="number" id="amount" placeholder="Amount" step="0.01" style="display: none;">
+                <div id="displayAmount" class="amount-display">0.00</div>
+                <input type="text" id="category" placeholder="Category (e.g., Food, Salary)">
+                <div id="categorySuggestions" class="category-suggestions"></div>
+                
+                <div class="quick-add-buttons">
+                    <button class="quick-add-btn" data-value="5">+5</button>
+                    <button class="quick-add-btn" data-value="10">+10</button>
+                    <button class="quick-add-btn" data-value="20">+20</button>
+                    <button class="quick-add-btn" data-value="50">+50</button>
+                </div>
+                
+                <div class="type-buttons">
+                    <button id="expenseBtn">Expense</button>
+                    <button id="incomeBtn">Income</button>
+                </div>
+            </div>
+
+            <div id="settingsModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h2>User Settings</h2>
+                    <div class="currency-selector">
+                        <label for="modalCurrency">Currency:</label>
+                        <select id="modalCurrency">
+                            <option value="EUR">EUR</option>
+                            <option value="SEK">SEK</option>
+                            <option value="USD">USD</option>
+                        </select>
+                    </div>
+                    <div class="dark-mode-toggle">
+                        <label class="switch" for="darkModeToggle">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="slider round">
+                                <span class="icon sun">☀️</span>
+                                <span class="icon moon">🌙</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="transactions-header">
+                <h2>Transactions</h2>
+                <button id="sortBtn" class="sort-button">Newest First ↑</button>
+            </div>
+            <ul id="transactionList">
+                <!-- Transactions will be loaded here -->
+            </ul>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
