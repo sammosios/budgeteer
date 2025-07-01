@@ -10,7 +10,9 @@ const loginBtn = document.getElementById('loginBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 
 const amountInput = document.getElementById('amount');
+const displayAmount = document.getElementById('displayAmount');
 const categoryInput = document.getElementById('category');
+const categorySuggestions = document.getElementById('categorySuggestions');
 const expenseBtn = document.getElementById('expenseBtn');
 const incomeBtn = document.getElementById('incomeBtn');
 const quickAddButtons = document.querySelectorAll('.quick-add-btn');
@@ -21,45 +23,7 @@ const settingsModal = document.getElementById('settingsModal');
 const closeModalBtn = settingsModal.querySelector('.close-button');
 const modalCurrencySelect = document.getElementById('modalCurrency');
 
-// Event Listeners
-registerBtn.addEventListener('click', registerUser);
-loginBtn.addEventListener('click', loginUser);
-logoutBtn.addEventListener('click', logoutUser);
-
-settingsBtn.addEventListener('click', () => {
-    settingsModal.style.display = 'block';
-    modalCurrencySelect.value = localStorage.getItem('selectedCurrency') || 'EUR';
-});
-
-closeModalBtn.addEventListener('click', () => {
-    settingsModal.style.display = 'none';
-});
-
-window.addEventListener('click', (event) => {
-    if (event.target == settingsModal) {
-        settingsModal.style.display = 'none';
-    }
-});
-
-modalCurrencySelect.addEventListener('change', (event) => {
-    localStorage.setItem('selectedCurrency', event.target.value);
-});
-
-expenseBtn.addEventListener('click', () => {
-    addTransaction('expense');
-});
-
-incomeBtn.addEventListener('click', () => {
-    addTransaction('income');
-});
-
-quickAddButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        amountInput.value = button.dataset.value;
-    });
-});
-
-// Functions
+// Functions (moved to top)
 function getToken() {
     return localStorage.getItem('accessToken');
 }
@@ -200,6 +164,7 @@ async function addTransaction(type) {
     }
 
     const finalCategory = category === '' ? 'Misc' : category;
+    saveCategory(finalCategory); // Save the category
 
     const newTransaction = {
         date: new Date().toISOString().split('T')[0],
@@ -221,6 +186,7 @@ async function addTransaction(type) {
 
         if (response.ok) {
             amountInput.value = '';
+            displayAmount.textContent = '0.00';
             categoryInput.value = '';
             fetchTransactions(); // Refresh the list
         } else if (response.status === 401 || response.status === 403) {
@@ -281,7 +247,7 @@ function displayTransactions(transactions) {
             <span class="${transaction.type}">
                 ${transaction.type === 'expense' ? '-' : '+'}${transaction.currency}${transaction.amount.toFixed(2)}
             </span>
-            <button class="delete-btn" data-id="${transaction.id}"><img src="trash-can.png" alt="Delete" class="delete-icon"></button>
+            <button class="delete-btn" data-id="${transaction.id}"><img src="trash_can.png" alt="Delete" class="delete-icon"></button>
         `;
         transactionList.appendChild(listItem);
     });
@@ -294,6 +260,93 @@ function displayTransactions(transactions) {
         });
     });
 }
+
+function getCategories() {
+    return JSON.parse(localStorage.getItem('categories') || '[]');
+}
+
+function saveCategory(category) {
+    const categories = getCategories();
+    if (!categories.includes(category)) {
+        categories.push(category);
+        localStorage.setItem('categories', JSON.stringify(categories));
+    }
+}
+
+function showSuggestions() {
+    const input = categoryInput.value.toLowerCase();
+    const categories = getCategories();
+    const filteredCategories = categories.filter(cat => cat.toLowerCase().includes(input));
+
+    categorySuggestions.innerHTML = '';
+    if (input === '' || filteredCategories.length === 0) {
+        categorySuggestions.style.display = 'none';
+        return;
+    }
+
+    filteredCategories.forEach(category => {
+        const suggestionItem = document.createElement('div');
+        suggestionItem.classList.add('suggestion-item');
+        suggestionItem.textContent = category;
+        suggestionItem.addEventListener('click', () => {
+            categoryInput.value = category;
+            categorySuggestions.style.display = 'none';
+        });
+        categorySuggestions.appendChild(suggestionItem);
+    });
+    categorySuggestions.style.display = 'block';
+}
+
+// Event Listeners (moved to bottom)
+registerBtn.addEventListener('click', registerUser);
+loginBtn.addEventListener('click', loginUser);
+logoutBtn.addEventListener('click', logoutUser);
+
+settingsBtn.addEventListener('click', () => {
+    settingsModal.style.display = 'block';
+    modalCurrencySelect.value = localStorage.getItem('selectedCurrency') || 'EUR';
+});
+
+closeModalBtn.addEventListener('click', () => {
+    settingsModal.style.display = 'none';
+});
+
+window.addEventListener('click', (event) => {
+    if (event.target == settingsModal) {
+        settingsModal.style.display = 'none';
+    }
+});
+
+modalCurrencySelect.addEventListener('change', (event) => {
+    localStorage.setItem('selectedCurrency', event.target.value);
+});
+
+expenseBtn.addEventListener('click', () => {
+    addTransaction('expense');
+});
+
+incomeBtn.addEventListener('click', () => {
+    addTransaction('income');
+});
+
+quickAddButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const currentAmount = parseFloat(amountInput.value || '0');
+        const addedAmount = parseFloat(button.dataset.value);
+        amountInput.value = (currentAmount + addedAmount).toString();
+        displayAmount.textContent = parseFloat(amountInput.value).toFixed(2);
+    });
+});
+
+categoryInput.addEventListener('input', showSuggestions);
+categoryInput.addEventListener('focus', showSuggestions);
+
+// Hide suggestions when clicking outside
+document.addEventListener('click', (event) => {
+    if (!categoryInput.contains(event.target) && !categorySuggestions.contains(event.target)) {
+        categorySuggestions.style.display = 'none';
+    }
+});
 
 // Initial UI update on page load
 updateUI();

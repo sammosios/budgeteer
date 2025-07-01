@@ -24,14 +24,16 @@
             <button id="logoutBtn" class="logout-button">Logout</button>
             <button id="settingsBtn" class="settings-button">Settings</button>
             <div class="input-section">
-                <input type="number" id="amount" placeholder="Amount" step="0.01">
+                <input type="number" id="amount" placeholder="Amount" step="0.01" style="display: none;">
+                <div id="displayAmount" class="amount-display">0.00</div>
                 <input type="text" id="category" placeholder="Category (e.g., Food, Salary)">
+                <div id="categorySuggestions" class="category-suggestions"></div>
                 
                 <div class="quick-add-buttons">
-                    <button class="quick-add-btn" data-value="5">5</button>
-                    <button class="quick-add-btn" data-value="10">10</button>
-                    <button class="quick-add-btn" data-value="20">20</button>
-                    <button class="quick-add-btn" data-value="50">50</button>
+                    <button class="quick-add-btn" data-value="5">+5</button>
+                    <button class="quick-add-btn" data-value="10">+10</button>
+                    <button class="quick-add-btn" data-value="20">+20</button>
+                    <button class="quick-add-btn" data-value="50">+50</button>
                 </div>
                 
                 <div class="type-buttons">
