@@ -9,6 +9,7 @@
 <body>
     <div class="container">
         <h1>Budgeteer</h1>
+        <div id="errorMessage" class="error-message"></div>
 
         <div id="loginSection">
             <h2>Login / Register</h2>
@@ -21,8 +22,10 @@
         </div>
 
         <div id="appSection" style="display: none;">
-            <button id="logoutBtn" class="logout-button">Logout</button>
-            <button id="settingsBtn" class="settings-button">Settings</button>
+            <div class="top-buttons-container">
+                <button id="logoutBtn" class="logout-button">Logout</button>
+                <button id="settingsBtn" class="settings-button">Settings</button>
+            </div>
             <div class="input-section">
                 <input type="number" id="amount" placeholder="Amount" step="0.01" style="display: none;">
                 <div id="displayAmount" class="amount-display">0.00</div>
@@ -54,10 +57,22 @@
                             <option value="USD">USD</option>
                         </select>
                     </div>
+                    <div class="dark-mode-toggle">
+                        <label class="switch" for="darkModeToggle">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="slider round">
+                                <span class="icon sun">☀️</span>
+                                <span class="icon moon">🌙</span>
+                            </span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
-            <h2>Transactions</h2>
+            <div class="transactions-header">
+                <h2>Transactions</h2>
+                <button id="sortBtn" class="sort-button">Newest First ↑</button>
+            </div>
             <ul id="transactionList">
                 <!-- Transactions will be loaded here -->
             </ul>

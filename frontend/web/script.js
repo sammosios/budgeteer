@@ -17,11 +17,16 @@ const expenseBtn = document.getElementById('expenseBtn');
 const incomeBtn = document.getElementById('incomeBtn');
 const quickAddButtons = document.querySelectorAll('.quick-add-btn');
 const transactionList = document.getElementById('transactionList');
+const sortBtn = document.getElementById('sortBtn');
+const errorMessageDisplay = document.getElementById('errorMessage');
+
+let isReversedOrder = true; // Default to newest on top
 
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.getElementById('settingsModal');
 const closeModalBtn = settingsModal.querySelector('.close-button');
 const modalCurrencySelect = document.getElementById('modalCurrency');
+const darkModeToggle = document.getElementById('darkModeToggle');
 
 // Functions (moved to top)
 function getToken() {
@@ -45,6 +50,28 @@ function updateUI() {
         loginSection.style.display = 'block';
         appSection.style.display = 'none';
     }
+    applyDarkModePreference();
+}
+
+function applyDarkModePreference() {
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    document.body.classList.toggle('dark-mode', isDarkMode);
+    darkModeToggle.checked = isDarkMode;
+
+    // Update trash can icons
+    const trashIcons = document.querySelectorAll('.delete-icon');
+    trashIcons.forEach(icon => {
+        icon.src = isDarkMode ? 'assets/trash_can_dark.png' : 'assets/trash_can.png';
+    });
+}
+
+function setErrorMessage(message) {
+    errorMessageDisplay.textContent = message;
+    errorMessageDisplay.style.display = 'block';
+    setTimeout(() => {
+        errorMessageDisplay.textContent = '';
+        errorMessageDisplay.style.display = 'none';
+    }, 3000); // Clear after 3 seconds
 }
 
 async function registerUser() {
@@ -52,7 +79,7 @@ async function registerUser() {
     const password = passwordInput.value.trim();
 
     if (!username || !password) {
-        alert('Please enter both username and password.');
+        setErrorMessage('Please enter both username and password.');
         return;
     }
 
@@ -67,15 +94,15 @@ async function registerUser() {
 
         const data = await response.json();
         if (response.ok) {
-            alert(data.message);
+            setErrorMessage(data.message);
             // Optionally, log in the user immediately after registration
             loginUser();
         } else {
-            alert(`Registration failed: ${data.error}`);
+            setErrorMessage(`Registration failed: ${data.error}`);
         }
     } catch (error) {
         console.error('Error during registration:', error);
-        alert('Registration failed.');
+        setErrorMessage('Registration failed.');
     }
 }
 
@@ -84,7 +111,7 @@ async function loginUser() {
     const password = passwordInput.value.trim();
 
     if (!username || !password) {
-        alert('Please enter both username and password.');
+        setErrorMessage('Please enter both username and password.');
         return;
     }
 
@@ -102,11 +129,11 @@ async function loginUser() {
             setToken(data.accessToken);
             updateUI();
         } else {
-            alert(`Login failed: ${data.error}`);
+            setErrorMessage(`Login failed: ${data.error}`);
         }
     } catch (error) {
         console.error('Error during login:', error);
-        alert('Login failed.');
+        setErrorMessage('Login failed.');
     }
 }
 
@@ -134,22 +161,22 @@ async function fetchTransactions() {
             const transactions = await response.json();
             displayTransactions(transactions);
         } else if (response.status === 401 || response.status === 403) {
-            alert('Session expired or unauthorized. Please log in again.');
+            setErrorMessage('Session expired or unauthorized. Please log in again.');
             logoutUser();
         } else {
             const errorData = await response.json();
-            alert(`Failed to fetch transactions: ${errorData.error}`);
+            setErrorMessage(`Failed to fetch transactions: ${errorData.error}`);
         }
     } catch (error) {
         console.error('Error fetching transactions:', error);
-        alert('Failed to fetch transactions.');
+        setErrorMessage('Failed to fetch transactions.');
     }
 }
 
 async function addTransaction(type) {
     const token = getToken();
     if (!token) {
-        alert('Please log in to add transactions.');
+        setErrorMessage('Please log in to add transactions.');
         updateUI();
         return;
     }
@@ -159,7 +186,7 @@ async function addTransaction(type) {
     const currency = localStorage.getItem('selectedCurrency') || 'EUR';
 
     if (isNaN(amount)) {
-        alert('Please enter a valid amount.');
+        setErrorMessage('Please enter a valid amount.');
         return;
     }
 
@@ -190,22 +217,22 @@ async function addTransaction(type) {
             categoryInput.value = '';
             fetchTransactions(); // Refresh the list
         } else if (response.status === 401 || response.status === 403) {
-            alert('Session expired or unauthorized. Please log in again.');
+            setErrorMessage('Session expired or unauthorized. Please log in again.');
             logoutUser();
         } else {
             const errorData = await response.json();
-            alert(`Failed to add transaction: ${errorData.error}`);
+            setErrorMessage(`Failed to add transaction: ${errorData.error}`);
         }
     } catch (error) {
         console.error('Error adding transaction:', error);
-        alert('Failed to add transaction.');
+        setErrorMessage('Failed to add transaction.');
     }
 }
 
 async function deleteTransaction(id) {
     const token = getToken();
     if (!token) {
-        alert('Please log in to delete transactions.');
+        setErrorMessage('Please log in to delete transactions.');
         updateUI();
         return;
     }
@@ -221,15 +248,15 @@ async function deleteTransaction(id) {
         if (response.ok) {
             fetchTransactions(); // Refresh the list
         } else if (response.status === 401 || response.status === 403) {
-            alert('Session expired or unauthorized. Please log in again.');
+            setErrorMessage('Session expired or unauthorized. Please log in again.');
             logoutUser();
         } else {
             const errorData = await response.json();
-            alert(`Failed to delete transaction: ${errorData.error}`);
+            setErrorMessage(`Failed to delete transaction: ${errorData.error}`);
         }
     } catch (error) {
         console.error('Error deleting transaction:', error);
-        alert('Failed to delete transaction.');
+        setErrorMessage('Failed to delete transaction.');
     }
 }
 
@@ -239,7 +266,12 @@ function displayTransactions(transactions) {
         transactionList.innerHTML = '<p style="text-align: center;">No transactions yet. Add one!</p>';
         return;
     }
-    transactions.forEach(transaction => {
+
+    const sortedTransactions = isReversedOrder ? [...transactions].reverse() : transactions;
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    const trashIcon = isDarkMode ? 'assets/trash_can_dark.png' : 'assets/trash_can.png';
+
+    sortedTransactions.forEach(transaction => {
         const listItem = document.createElement('li');
         listItem.innerHTML = `
             <span>${transaction.date}</span>
@@ -247,7 +279,7 @@ function displayTransactions(transactions) {
             <span class="${transaction.type}">
                 ${transaction.type === 'expense' ? '-' : '+'}${transaction.currency}${transaction.amount.toFixed(2)}
             </span>
-            <button class="delete-btn" data-id="${transaction.id}"><img src="trash_can.png" alt="Delete" class="delete-icon"></button>
+            <button class="delete-btn" data-id="${transaction.id}"><img src="${document.body.classList.contains('dark-mode') ? 'assets/trash_can_dark.png' : 'assets/trash_can.png'}" alt="Delete" class="delete-icon"></button>
         `;
         transactionList.appendChild(listItem);
     });
@@ -321,12 +353,52 @@ modalCurrencySelect.addEventListener('change', (event) => {
     localStorage.setItem('selectedCurrency', event.target.value);
 });
 
+darkModeToggle.addEventListener('change', (event) => {
+    const isDarkMode = event.target.checked;
+    localStorage.setItem('darkMode', isDarkMode);
+    applyDarkModePreference();
+});
+
+sortBtn.addEventListener('click', () => {
+    isReversedOrder = !isReversedOrder;
+    sortBtn.textContent = `${isReversedOrder ? 'Newest First ↑' : 'Oldest First ↓'}`;
+    fetchTransactions();
+});
+
 expenseBtn.addEventListener('click', () => {
     addTransaction('expense');
 });
 
 incomeBtn.addEventListener('click', () => {
     addTransaction('income');
+});
+
+displayAmount.addEventListener('click', () => {
+    displayAmount.contentEditable = true;
+    displayAmount.focus();
+    // Select all text when focused
+    const range = document.createRange();
+    range.selectNodeContents(displayAmount);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+});
+
+displayAmount.addEventListener('blur', () => {
+    displayAmount.contentEditable = false;
+    let value = parseFloat(displayAmount.textContent || '0');
+    if (isNaN(value)) {
+        value = 0;
+    }
+    amountInput.value = value.toString();
+    displayAmount.textContent = value.toFixed(2);
+});
+
+displayAmount.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent new line
+        displayAmount.blur(); // Trigger blur to save value
+    }
 });
 
 quickAddButtons.forEach(button => {
@@ -349,4 +421,5 @@ document.addEventListener('click', (event) => {
 });
 
 // Initial UI update on page load
+applyDarkModePreference();
 updateUI();
