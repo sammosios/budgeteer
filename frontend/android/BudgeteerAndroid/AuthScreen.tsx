@@ -148,8 +148,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: '#333',
+    fontSize: 14,
   },
 });
 

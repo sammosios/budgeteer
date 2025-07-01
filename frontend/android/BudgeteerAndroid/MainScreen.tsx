@@ -235,16 +235,20 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     flex: 1,
-    padding: 8,
-    backgroundColor: '#dc3545',
+    padding: 6,
+    backgroundColor: 'transparent',
+    borderColor: '#dc3545',
+    borderWidth: 1,
     borderRadius: 4,
     alignItems: 'center',
     marginRight: 5,
   },
   settingsButton: {
     flex: 1,
-    padding: 8,
-    backgroundColor: '#007bff',
+    padding: 6,
+    backgroundColor: 'transparent',
+    borderColor: '#007bff',
+    borderWidth: 1,
     borderRadius: 4,
     alignItems: 'center',
     marginLeft: 5,
@@ -321,7 +325,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: '#000',
     fontSize: 16,
   },
   transactionsHeader: {
