@@ -20,7 +20,7 @@ const transactionList = document.getElementById('transactionList');
 const sortBtn = document.getElementById('sortBtn');
 const errorMessageDisplay = document.getElementById('errorMessage');
 
-let isReversedOrder = true; // Default to newest on top
+let isReversedOrder = false; // Default to newest on top
 
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.getElementById('settingsModal');
