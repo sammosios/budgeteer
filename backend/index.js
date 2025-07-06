@@ -10,7 +10,7 @@ const port = 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwtkey'; // Use environment variable in production
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: 'http://budgeteer.ui' }));
 
 // Initialize SQLite database
 const db = new sqlite3.Database('./budget.db', (err) => {
