@@ -1,4 +1,4 @@
-const API_URL = window.API_URL;
+const API_URL = window.APP_CONFIG.API_URL;
 
 // Get DOM elements
 const loginSection = document.getElementById('loginSection');

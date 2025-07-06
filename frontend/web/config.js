@@ -1,1 +1,3 @@
-window.API_URL = 'http://localhost:3000';
+window.APP_CONFIG = {
+  API_URL: 'http://localhost:3000'
+};
