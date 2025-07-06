@@ -3,6 +3,8 @@ FROM nginx:alpine
 
 COPY . /usr/share/nginx/html
 
+RUN chmod +x /usr/share/nginx/html/entrypoint.sh
+
 EXPOSE 80
 
-ENTRYPOINT [ "/bin/sh", "/usr/share/nginx/html/entrypoint.sh" ]
+ENTRYPOINT [ "/usr/share/nginx/html/entrypoint.sh" ]

@@ -1,1 +1,1 @@
-window.API_URL = 'http://192.168.1.57:3000';
+window.API_URL = 'http://localhost:3000';
