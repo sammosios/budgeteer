@@ -45,16 +45,16 @@ write_files:
       }
 
 runcmd:
-  # Rule 5: Allow new incoming TCP connections on port 80 (HTTP)
+  # Allow new incoming TCP connections on port 80 (HTTP)
   - iptables -I INPUT 5 -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
-  # Rule 6: Allow new incoming TCP connections on port 443 (HTTPS)
+  # Allow new incoming TCP connections on port 443 (HTTPS)
   - iptables -I INPUT 6 -p tcp --dport 443 -m conntrack --ctstate NEW -j ACCEPT
 
   # Install Caddy
   - curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
   - curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/deb.debian.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
   - apt-get update
-  - apt-get install -y caddy
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y caddy
 
   - git clone https://github.com/sammosios/budgeteer.git /opt/budgeteer
   - chown -R www-data:www-data /opt/budgeteer
@@ -63,7 +63,7 @@ runcmd:
   # Backend setup
   - cd /opt/budgeteer/backend
   - npm install --omit=dev
-  
+
   # Enable and start backend service
   - systemctl daemon-reload
   - systemctl enable --now budgeteer-backend
