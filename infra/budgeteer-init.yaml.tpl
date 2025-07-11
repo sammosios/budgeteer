@@ -54,9 +54,9 @@ runcmd:
   - curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
   - curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/deb.debian.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
   - apt-get update
-  - DEBIAN_FRONTEND=noninteractive apt-get install -y caddy
+  - apt-get install -y -o Dpkg::Options::="--force-confold" caddy
 
-  - git clone https://github.com/sammosios/budgeteer.git /opt/budgeteer
+  - git clone --depth 1 https://github.com/sammosios/budgeteer.git /opt/budgeteer
   - chown -R www-data:www-data /opt/budgeteer
   - chmod -R 755 /opt/budgeteer
 
