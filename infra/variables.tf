@@ -17,3 +17,28 @@ variable "ubuntu_image_id" {
   default     = "ocid1.image.oc1.eu-stockholm-1.aaaaaaaam6t7hfwppnu4ki6eej4kfytqfapcsrtuyu5r2rqybidhtr6k54ja"
 }
 
+variable "environments" {
+  description = "Map of environment configurations."
+  type = map(object({
+    display_name      = string
+    frontend_url      = string
+    api_url           = string
+    git_branch        = string
+  }))
+  default = {
+    dev = {
+      display_name      = "budgeteer-dev"
+      frontend_url = "https://dev.budgeteer.sammosios.com"
+      api_url        = "https://api.dev.budgeteer.sammosios.com"
+      git_branch      = "main"
+
+    }
+    prod = {
+      display_name      = "budgeteer-prod"
+      frontend_url = "https://budgeteer.sammosios.com"
+      api_url        = "https://api.budgeteer.sammosios.com"
+      git_branch      = "main"
+    }
+  }
+}
+

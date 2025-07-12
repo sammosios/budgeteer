@@ -3,9 +3,11 @@ data "oci_identity_availability_domains" "ads" {
 }
 
 resource "oci_core_instance" "budgeteer" {
+  for_each = var.environments
+
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
   compartment_id      = var.compartment_ocid
-  display_name        = "budgeteer"
+  display_name        = each.value.display_name
   shape               = var.vm_shape
 
   create_vnic_details {
@@ -20,41 +22,14 @@ resource "oci_core_instance" "budgeteer" {
 
   metadata = {
     ssh_authorized_keys = file(var.ssh_public_key_path)
-    user_data           = base64encode(templatefile("${path.module}/budgeteer-init.yaml.tpl", {}))
-  }
-
-  lifecycle {
-    ignore_changes = [metadata]
-  }
-}
-
-output "budgeteer_public_ip" {
-  value = oci_core_instance.budgeteer.public_ip
-}
-
-resource "oci_core_instance" "budgeteer_test" {
-  availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
-  compartment_id      = var.compartment_ocid
-  display_name        = "budgeteer-test"
-  shape               = var.vm_shape
-
-  create_vnic_details {
-    subnet_id        = oci_core_subnet.budgeteer_subnet.id
-    assign_public_ip = true
-  }
-
-  source_details {
-    source_id   = var.ubuntu_image_id
-    source_type = "image"
-  }
-
-  metadata = {
-    ssh_authorized_keys = file(var.ssh_public_key_path)
-    user_data           = base64encode(templatefile("${path.module}/budgeteer-init.yaml.tpl", {}))
+    user_data           = base64encode(templatefile("${path.module}/scripts/cloud-init.yaml.tpl", {
+      git_branch      = "main"
+      frontend_url = each.value.frontend_url
+      api_url      = each.value.api_url
+    }))
   }
 }
 
-output "budgeteer_test_public_ip" {
-  value = oci_core_instance.budgeteer_test.public_ip
+output "budgeteer_public_ips" {
+  value = { for k, v in oci_core_instance.budgeteer : k => v.public_ip }
 }
-

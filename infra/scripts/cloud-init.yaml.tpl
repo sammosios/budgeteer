@@ -35,14 +35,21 @@ write_files:
   - path: /etc/caddy/Caddyfile
     permissions: '0644'
     content: |
-      budgeteer.sammosios.com {
+      ${frontend_url} {
           root * /opt/budgeteer/frontend
           file_server
       }
 
-      api.budgeteer.sammosios.com {
+      ${api_url} {
           reverse_proxy localhost:3000
       }
+
+  - path: /opt/budgeteer/frontend/config.js
+    permissions: '0644'
+    content: |
+      window.APP_CONFIG = {
+        API_URL: '${api_url}'
+      };
 
 runcmd:
   # Allow new incoming TCP connections on port 80 (HTTP)
@@ -56,9 +63,13 @@ runcmd:
   - apt-get update
   - apt-get install -y -o Dpkg::Options::="--force-confold" caddy
 
-  - git clone --depth 1 https://github.com/sammosios/budgeteer.git /opt/budgeteer
+  # Clone the specified branch (default: main)
+  - git clone --depth 1 --branch ${git_branch} https://github.com/sammosios/budgeteer.git /opt/budgeteer
+
+  # Set permissions (directories: 755, files: 644)
+  - find /opt/budgeteer -type d -exec chmod 755 {} \;
+  - find /opt/budgeteer -type f -exec chmod 644 {} \;
   - chown -R www-data:www-data /opt/budgeteer
-  - chmod -R 755 /opt/budgeteer
 
   # Backend setup
   - cd /opt/budgeteer/backend
@@ -68,7 +79,7 @@ runcmd:
   - systemctl daemon-reload
   - systemctl enable --now budgeteer-backend
 
-  # Reload Caddy
-  - systemctl reload caddy
+  # Restart Caddy
+  - systemctl restart caddy
 
 final_message: "The system is now configured and ready to use."
