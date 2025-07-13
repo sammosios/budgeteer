@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - .github/workflows
 
 jobs:
-  trigger_dev:
+  trigger_prod:
     uses: ./.github/workflows/_deploy.yaml
     with:
       environment: prod
