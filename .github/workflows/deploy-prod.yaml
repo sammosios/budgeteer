@@ -1,4 +1,4 @@
-name: Deploy to Prod
+name: Deploy - Prod
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  trigger_dev:
     uses: ./.github/workflows/_deploy.yaml
     with:
       environment: prod
