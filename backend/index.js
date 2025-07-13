@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
 
 const app = express();
 const port = 3000;
@@ -16,8 +17,16 @@ app.use(cors({ origin:
         'https://dev.budgeteer.sammosios.com'    
     ]  }));
 
+// Ensure budget.db exists or create it before initializing sqlite3.Database
+const dbPath = './budget.db';
+if (!fs.existsSync(dbPath)) {
+    // Create an empty file synchronously
+    fs.closeSync(fs.openSync(dbPath, 'w'));
+    console.log('budget.db not found, creating new database file.');
+}
+
 // Initialize SQLite database
-const db = new sqlite3.Database('./budget.db', (err) => {
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error opening database:', err.message);
     } else {
