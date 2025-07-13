@@ -1,0 +1,15 @@
+name: Deploy to Dev
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy.yaml
+    with:
+      environment: dev
+    secrets:
+      OCI_VM_IP: ${{ secrets.OCI_VM_IP }}
+      OCI_SSH_PRIVATE_KEY: ${{ secrets.OCI_SSH_PRIVATE_KEY }}

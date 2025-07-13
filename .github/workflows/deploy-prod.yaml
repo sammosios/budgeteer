@@ -1,0 +1,15 @@
+name: Deploy to Prod
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy.yaml
+    with:
+      environment: prod
+    secrets:
+      OCI_VM_IP: ${{ secrets.OCI_VM_IP }}
+      OCI_SSH_PRIVATE_KEY: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
