@@ -1,0 +1,13 @@
+# Backend
+node_modules/
+package-lock.json
+
+# INFRA
+.terraform
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfvars
+
+ssh-pub.key
+ssh-priv.key

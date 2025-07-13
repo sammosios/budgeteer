@@ -1,3 +1,3 @@
 window.APP_CONFIG = {
-  API_URL: 'https://api.budgeteer.sammosios.com'
+  API_URL: 'API_URL_PLACEHOLDER', // Replaced in CI/CD pipeline
 };
