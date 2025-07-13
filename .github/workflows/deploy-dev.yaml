@@ -1,4 +1,4 @@
-name: Deploy to Dev
+name: Deploy - Dev
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - dev
 
 jobs:
-  deploy:
+  trigger_dev:
     uses: ./.github/workflows/_deploy.yaml
     with:
       environment: dev
