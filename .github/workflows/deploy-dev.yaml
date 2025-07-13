@@ -5,8 +5,9 @@ on:
     branches:
       - dev
     paths-ignore:
-      - .github/workflows
+      - .github/workflows/**
 
+## Adds random comment
 jobs:
   trigger_dev:
     uses: ./.github/workflows/_deploy.yaml
