@@ -1,3 +1,10 @@
+data "terraform_remote_state" "networking" {
+  backend = "local"
+  config = {
+    path = "../networking/terraform.tfstate"
+  }
+}
+
 data "oci_identity_availability_domains" "ads" {
   compartment_id = var.compartment_ocid
 }
@@ -11,7 +18,7 @@ resource "oci_core_instance" "budgeteer" {
   shape               = var.vm_shape
 
   create_vnic_details {
-    subnet_id        = oci_core_subnet.budgeteer_subnet.id
+    subnet_id        = data.terraform_remote_state.networking.outputs.subnet_id
     assign_public_ip = true
   }
 
@@ -22,7 +29,7 @@ resource "oci_core_instance" "budgeteer" {
 
   metadata = {
     ssh_authorized_keys = file(var.ssh_public_key_path)
-    user_data           = base64encode(templatefile("${path.module}/scripts/cloud-init.yaml.tpl", {
+    user_data           = base64encode(templatefile("${path.module}/../scripts/cloud-init.yaml.tpl", {
       git_branch      = "main"
       frontend_url = each.value.frontend_url
       api_url      = each.value.api_url

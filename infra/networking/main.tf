@@ -1,3 +1,4 @@
+// Networking resources for Budgeteer
 resource "oci_core_vcn" "budgeteer_vcn" {
   cidr_block     = "10.0.0.0/16"
   compartment_id = var.compartment_ocid
@@ -73,4 +74,3 @@ resource "oci_core_subnet" "budgeteer_subnet" {
   security_list_ids = [oci_core_security_list.budgeteer_security_list.id]
   dhcp_options_id   = oci_core_vcn.budgeteer_vcn.default_dhcp_options_id
 }
-
