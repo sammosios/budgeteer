@@ -166,8 +166,14 @@ app.post('/transactions', authenticateToken, (req, res) => {
 // API to get all transactions (protected)
 app.get('/transactions', authenticateToken, (req, res) => {
     const user_id = req.user.id; // Get user_id from authenticated token
-
-    db.all(`SELECT * FROM transactions WHERE user_id = ? ORDER BY date DESC`, [user_id], (err, rows) => {
+    // Support ?ascending=true or ?order=asc/desc
+    let order = 'DESC';
+    if (req.query.ascending !== undefined) {
+        order = req.query.ascending === 'true' ? 'ASC' : 'DESC';
+    } else if (req.query.order) {
+        order = req.query.order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    }
+    db.all(`SELECT * FROM transactions WHERE user_id = ? ORDER BY date ${order}`,[user_id], (err, rows) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }

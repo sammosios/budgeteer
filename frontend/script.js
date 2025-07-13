@@ -20,7 +20,7 @@ const transactionList = document.getElementById('transactionList');
 const sortBtn = document.getElementById('sortBtn');
 const errorMessageDisplay = document.getElementById('errorMessage');
 
-let isReversedOrder = false; // Default to newest on top
+let isReversedOrder = true; // Default to newest on top
 
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.getElementById('settingsModal');
@@ -151,7 +151,9 @@ async function fetchTransactions() {
     }
 
     try {
-        const response = await fetch(`${API_URL}/transactions`, {
+        // Pass order param based on isReversedOrder
+        const order = isReversedOrder ? 'desc' : 'asc';
+        const response = await fetch(`${API_URL}/transactions?order=${order}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
@@ -361,7 +363,7 @@ darkModeToggle.addEventListener('change', (event) => {
 
 sortBtn.addEventListener('click', () => {
     isReversedOrder = !isReversedOrder;
-    sortBtn.textContent = `${isReversedOrder ? 'Newest First ↑' : 'Oldest First ↓'}`;
+    sortBtn.textContent = `${isReversedOrder ? 'Newest First' : 'Oldest First'}`;
     fetchTransactions();
 });
 
