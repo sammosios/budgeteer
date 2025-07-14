@@ -1,4 +1,4 @@
-name: Reusable Deploy
+name: Deploy project to environment
 
 on:
   workflow_call:
