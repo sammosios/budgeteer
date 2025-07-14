@@ -29,14 +29,21 @@ resource "oci_core_instance" "budgeteer" {
 
   metadata = {
     ssh_authorized_keys = file(var.ssh_public_key_path)
+    jwt_secret         = random_password.jwt_secret.result
     user_data           = base64encode(templatefile("${path.module}/../scripts/cloud-init.yaml.tpl", {
       git_branch      = "main"
       frontend_url = each.value.frontend_url
       api_url      = each.value.api_url
+      jwt_secret   = random_password.jwt_secret.result
     }))
   }
 }
 
 output "budgeteer_public_ips" {
   value = { for k, v in oci_core_instance.budgeteer : k => v.public_ip }
+}
+
+resource "random_password" "jwt_secret" {
+  length  = 48
+  special = true
 }

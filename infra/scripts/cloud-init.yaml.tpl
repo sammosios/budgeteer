@@ -28,6 +28,7 @@ write_files:
       Group=www-data
       Environment=NODE_ENV=production
       Environment=PORT=3000
+      Environment=JWT_SECRET=${jwt_secret}
 
       [Install]
       WantedBy=multi-user.target

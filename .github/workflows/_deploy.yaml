@@ -1,4 +1,4 @@
-name: Reusable Deploy
+name: Deploy project to environment
 
 on:
   workflow_call:
@@ -49,6 +49,9 @@ jobs:
 
           # Restore configuration
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.OCI_VM_IP }} "sudo mv /tmp/config.js /opt/budgeteer/frontend/config.js"
+
+          # Set ownership
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.OCI_VM_IP }} "sudo chown -R www-data:www-data /opt/budgeteer"
 
           # Backend setup
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.OCI_VM_IP }} "cd /opt/budgeteer/backend && sudo npm install --omit=dev"
