@@ -1,0 +1,49 @@
+name: Deploy - Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      compute:
+        description: 'Deploy Compute (VMs)'
+        type: boolean
+        required: true
+        default: true
+      networking:
+        description: 'Deploy Networking components (e.g., VCN, subnets)'
+        type: boolean
+        required: true
+        default: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up OCI API key
+        run: |
+          echo "${{ secrets.OCI_API_KEY }}" > /home/runner/work/_temp/oci_api_key.pem
+          chmod 600 /home/runner/work/_temp/oci_api_key.pem
+
+      - name: Set up OCI CLI
+        uses: oracle/setup-oci-cli@v2
+        with:
+          oci_config_file: ${{ secrets.OCI_CONFIG_FILE }}
+          oci_config_profile: DEFAULT
+
+      - name: Deploy Networking
+        if: ${{ inputs.networking == true }}
+        run: |
+          cd $GITHUB_WORKSPACE/infra/networking
+          terraform apply --auto-approve
+
+      - name: Deploy Compute
+        if: ${{ inputs.compute == true }}
+        run: |
+          cd $GITHUB_WORKSPACE/infra/compute
+          terraform apply --auto-approve
+
+
+          
